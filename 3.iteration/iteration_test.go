@@ -10,3 +10,9 @@ func TestRepeat(t *testing.T) {
 		t.Errorf("\ngot:  %q \nwant: %q", got, want)
 	}
 }
+
+func BenchmarkRepeat(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Repeat("a", 5)
+	}
+}
