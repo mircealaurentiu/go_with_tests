@@ -3,7 +3,7 @@ package propertybasedtests
 import "strings"
 
 type RomanNumeral struct {
-	Value  int
+	Value  uint16
 	Symbol string
 }
 
@@ -23,7 +23,7 @@ var allRomanNumerals = []RomanNumeral{
 	{1, "I"},
 }
 
-func ConvertToRoman(arabicNumber int) string {
+func ConvertToRoman(arabicNumber uint16) string {
 
 	var result strings.Builder
 
@@ -36,4 +36,18 @@ func ConvertToRoman(arabicNumber int) string {
 
 	return result.String()
 
+}
+
+func ConvertToArabic(romanNumeral string) uint16 {
+
+	var arabicValue uint16 = 0
+
+	for _, numeral := range allRomanNumerals {
+		for strings.HasPrefix(romanNumeral, numeral.Symbol) {
+			arabicValue += numeral.Value
+			romanNumeral = strings.TrimPrefix(romanNumeral, numeral.Symbol)
+		}
+	}
+
+	return arabicValue
 }
