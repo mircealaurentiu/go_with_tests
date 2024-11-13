@@ -13,10 +13,18 @@ func TestNewBlogPosts(t *testing.T) {
 	const (
 		firstBody = `Title: Post 1
 Description: Description 1
-Tags: tag1, tag2`
+Tags: tag1, tag2
+---
+Hello World
+1`
 		secondBody = `Title: Post 2
 Description: Description 2
-Tags: tag3, tag4`
+Tags: tag3, tag4
+---
+Hello
+WORLD
+2
+!`
 	)
 
 	fs := fstest.MapFS{
@@ -38,6 +46,8 @@ Tags: tag3, tag4`
 		Title:       "Post 1",
 		Description: "Description 1",
 		Tags:        []string{"tag1", "tag2"},
+		Body: `Hello World
+1`,
 	})
 }
 
