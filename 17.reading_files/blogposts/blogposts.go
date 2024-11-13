@@ -1,13 +1,17 @@
 package blogposts
 
 import (
+	"bufio"
 	"errors"
 	"io"
 	"io/fs"
+	"strings"
 )
 
 type Post struct {
-	Title string
+	Title       string
+	Description string
+	Tags        []string
 }
 
 type StubFailingFS struct {
@@ -16,6 +20,12 @@ type StubFailingFS struct {
 func (s StubFailingFS) Open(name string) (fs.File, error) {
 	return nil, errors.New("fail")
 }
+
+const (
+	titleSeparation       = "Title: "
+	descriptionSeparation = "Description: "
+	tagsSeparation        = "Tags: "
+)
 
 func NewPostsFromFS(filesystem fs.FS) ([]Post, error) {
 
@@ -27,7 +37,7 @@ func NewPostsFromFS(filesystem fs.FS) ([]Post, error) {
 	var posts []Post
 
 	for _, f := range dir {
-		post, err := getPost(filesystem, f)
+		post, err := getPost(filesystem, f.Name())
 		if err != nil {
 			return nil, err // needs clarif, should we fail if one fails?
 		}
@@ -37,20 +47,25 @@ func NewPostsFromFS(filesystem fs.FS) ([]Post, error) {
 	return posts, nil
 }
 
-func getPost(filesystem fs.FS, f fs.DirEntry) (Post, error) {
-	postFile, err := filesystem.Open(f.Name())
+func getPost(filesystem fs.FS, filename string) (Post, error) {
+	postFile, err := filesystem.Open(filename)
 	if err != nil {
 		return Post{}, err
 	}
 
 	defer postFile.Close()
 
-	postData, err := io.ReadAll(postFile)
-	if err != nil {
-		return Post{}, err
+	return newPost(postFile)
+}
+
+func newPost(postFile io.Reader) (Post, error) {
+
+	scanner := bufio.NewScanner(postFile)
+
+	readLine := func(prefix string) string {
+		scanner.Scan()
+		return strings.TrimPrefix(scanner.Text(), prefix)
 	}
 
-	post := Post{Title: string(postData)[7:]}
-
-	return post, nil
+	return Post{Title: readLine(titleSeparation), Description: readLine(descriptionSeparation), Tags: strings.Split(readLine(tagsSeparation), ", ")}, nil
 }

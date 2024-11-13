@@ -9,9 +9,19 @@ import (
 )
 
 func TestNewBlogPosts(t *testing.T) {
+
+	const (
+		firstBody = `Title: Post 1
+Description: Description 1
+Tags: tag1, tag2`
+		secondBody = `Title: Post 2
+Description: Description 2
+Tags: tag3, tag4`
+	)
+
 	fs := fstest.MapFS{
-		"hello_world.md":   {Data: []byte("Title: Post 1")},
-		"hello_world_2.md": {Data: []byte("Title: Post 2")},
+		"hello_world.md":   {Data: []byte(firstBody)},
+		"hello_world_2.md": {Data: []byte(secondBody)},
 	}
 
 	posts, err := blogposts.NewPostsFromFS(fs)
@@ -24,10 +34,16 @@ func TestNewBlogPosts(t *testing.T) {
 		t.Errorf("\ngot  %d posts \nwant %d posts", len(posts), len(fs))
 	}
 
-	got := posts[0]
-	want := blogposts.Post{Title: "Post 1"}
+	assertPost(t, posts[0], blogposts.Post{
+		Title:       "Post 1",
+		Description: "Description 1",
+		Tags:        []string{"tag1", "tag2"},
+	})
+}
 
+func assertPost(t *testing.T, got blogposts.Post, want blogposts.Post) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("\ngot  %+v, want %+v", got, want)
+		t.Errorf("\ngot  %+v \nwant %+v", got, want)
 	}
 }
