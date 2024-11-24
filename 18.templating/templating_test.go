@@ -5,16 +5,20 @@ import (
 	"testing"
 
 	blogrender "github.com/mircealaurentiu/go_with_tests/18.templating"
+
+	approvals "github.com/approvals/go-approval-tests"
 )
 
 func TestRender(t *testing.T) {
 
-	aPost := blogrender.Post{
-		Title:       "hello world",
-		Body:        "this is a post",
-		Description: "this is a description",
-		Tags:        []string{"go", "tdd"},
-	}
+	var (
+		aPost = blogrender.Post{
+			Title:       "hello world",
+			Body:        "this is a post",
+			Description: "this is a description",
+			Tags:        []string{"go", "tdd"},
+		}
+	)
 
 	t.Run("it converts a single post into HTML", func(t *testing.T) {
 		buf := bytes.Buffer{}
@@ -24,14 +28,7 @@ func TestRender(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got := buf.String()
-		want := `<h1>hello world</h1>
-<p>this is a description</p>
-Tags: <ul><li>go</li><li>tdd</li></ul>`
-
-		if got != want {
-			t.Errorf("\ngot  %s \nwant %s", got, want)
-		}
+		approvals.VerifyString(t, buf.String())
 	})
 
 }
