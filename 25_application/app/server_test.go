@@ -1,6 +1,7 @@
-package application
+package app
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -8,30 +9,40 @@ import (
 
 func TestGETPlayers(t *testing.T) {
 
-	request, _ := http.NewRequest(http.MethodGet, "/players/Pepper", nil)
-	response := httptest.NewRecorder()
+	server := &PlayerServer{}
 
-	PlayerServer(response, request)
+	t.Run("return Pepper's score", func(t *testing.T) {
 
-	got := response.Body.String()
-	want := "20"
-
-	if got != want {
-		t.Errorf("\ngot  %q \nwant %q", got, want)
-	}
-
-	t.Run("return Floyd's score", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/players/Floyd", nil)
+		request := newGetScoreRequest("Pepper")
 		response := httptest.NewRecorder()
 
-		PlayerServer(response, request)
+		server.ServeHTTP(response, request)
 
-		got := response.Body.String()
-		want := "10"
-
-		if got != want {
-			t.Errorf("\ngot  %q \nwant %q", got, want)
-		}
+		assertResponseBody(t, response.Body.String(), "20")
 	})
+
+	t.Run("return Floyd's score", func(t *testing.T) {
+		request := newGetScoreRequest("Floyd")
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		assertResponseBody(t, response.Body.String(), "10")
+	})
+
+}
+
+func newGetScoreRequest(name string) *http.Request {
+
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
+	return request
+}
+
+func assertResponseBody(t testing.TB, got, want string) {
+
+	t.Helper()
+	if got != want {
+		t.Errorf("\nresponse body is wrong \ngot  %q \nwant %q", got, want)
+	}
 
 }
